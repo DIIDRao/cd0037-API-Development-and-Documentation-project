@@ -1,3 +1,4 @@
+import json
 import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -21,16 +22,29 @@ def create_app(test_config=None):
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
+    cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
     """
+    @app.after_request
+    def add_cors_headers(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
 
     """
     @TODO:
     Create an endpoint to handle GET requests
     for all available categories.
     """
+    @app.route("/categories")
+    def get_categories():
+        categories = Category.query.all()
+        formatted_categories = [category.format() for category in categories]
+        return jsonify({
+            "success": True,
+            "categories": formatted_categories
+        })
 
 
     """
@@ -45,6 +59,19 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     """
+
+    @app.route('/questions',methods=['GET'])
+    def get_questions():
+        page = request.args.get('page',1, type=int)
+        start = (page-1) * 10
+        end = start + 10
+        questions = Question.query.all()
+        formatted_questions = [question.format() for question in questions]
+        return jsonify({
+            "success": True,
+            "questions": formatted_questions[start:end],
+            "total_Questions": len(formatted_questions)
+        })
 
     """
     @TODO:
