@@ -10,7 +10,7 @@ class FormView extends Component {
       answer: '',
       difficulty: 1,
       category: 1,
-      categories: {},
+      categories: [],
     };
   }
 
@@ -19,7 +19,7 @@ class FormView extends Component {
       url: `/categories`, //TODO: update request URL
       type: 'GET',
       success: (result) => {
-        this.setState({ categories: result.categories });
+        this.setState({ categories: result.categories.map(cat => cat.id) });
         return;
       },
       error: (error) => {
@@ -30,7 +30,7 @@ class FormView extends Component {
   }
 
   submitQuestion = (event) => {
-    event.preventDefault();
+    event.preventDefault(); 
     $.ajax({
       url: '/questions', //TODO: update request URL
       type: 'POST',

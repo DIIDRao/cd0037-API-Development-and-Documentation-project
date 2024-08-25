@@ -4,6 +4,7 @@ from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
+from sqlalchemy.orm import load_only
 
 from models import setup_db, Question, Category
 
@@ -67,9 +68,18 @@ def create_app(test_config=None):
         end = start + 10
         questions = Question.query.all()
         formatted_questions = [question.format() for question in questions]
+        fields = ['type']
+        categories = Category.query.options(load_only(*fields)).all()
+        categoriesStrList=[]
+        print(categories)
+        for cat in categories:
+            categoriesStrList.append(cat.type)
+        print(categoriesStrList)    
         return jsonify({
             "success": True,
             "questions": formatted_questions[start:end],
+            "categories": categoriesStrList,
+            "current_category": "",
             "total_Questions": len(formatted_questions)
         })
 
@@ -85,7 +95,6 @@ def create_app(test_config=None):
     def delete_question(id):
         question = Question.query.get(id)
         print(question)
-        # question.delete()
         Question.delete(question)
         return jsonify({"success": True})
 
@@ -100,6 +109,21 @@ def create_app(test_config=None):
     of the questions list in the "List" tab.
     """
 
+    @app.route('/questions', methods=['POST'])
+    def add_question():
+        data = request.get_json(force=True)
+        question = Question(
+                    question=data.get('question'),
+                    answer=data.get('answer'),
+                    difficulty=data.get('difficulty'),
+                    category=data.get('category')
+                )
+        Question.insert(question)
+        return jsonify({
+            'success': True
+        })
+
+
     """
     @TODO:
     Create a POST endpoint to get questions based on a search term.
@@ -111,6 +135,20 @@ def create_app(test_config=None):
     Try using the word "title" to start.
     """
 
+    @app.route('/questions/search', methods=['POST'])
+    def search_questions():
+        data = request.get_json(force=True)
+        print(data.get('searchTerm'))
+        search_term = data.get('searchTerm')
+        questions = Question.query.filter(Question.question.contains(search_term)).all()
+        formatted_questions = [question.format() for question in questions]
+        return jsonify({
+            'success': True,
+            'questions': formatted_questions,
+            'total_questions': len(formatted_questions),
+            'current_category': ""
+        })
+
     """
     @TODO:
     Create a GET endpoint to get questions based on category.
@@ -119,6 +157,18 @@ def create_app(test_config=None):
     categories in the left column will cause only questions of that
     category to be shown.
     """
+
+    @app.route('/categories/<int:id>/questions')
+    def get_questions_by_category(id):
+        questions = Question.query.filter_by(category=id).all()
+        formatted_questions = [question.format() for question in questions]
+        return jsonify({
+            'success': True,
+            'questions': formatted_questions,
+            'total_questions': len(formatted_questions),
+            'current_category': ""
+        })
+
 
     """
     @TODO:
