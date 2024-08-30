@@ -168,6 +168,25 @@ def create_app(test_config=None):
             'total_questions': len(formatted_questions),
             'current_category': ""
         })
+    
+    @app.route('/quizzes', methods=['POST'])
+    def get_next_question():
+        data = request.get_json(force=True)
+        previous_questions = data.get('previous_questions')
+        quiz_category = data.get('quiz_category')
+        print(previous_questions)
+        print(quiz_category)
+        questions = Question.query.filter(Question.id.notin_(previous_questions)).all()
+        print(questions)
+        if(len(questions) > 0):
+            result_question = questions[0]
+            print(result_question)
+        return jsonify({
+            'success': True,
+            'previousQuestions': previous_questions,
+            'currentQuestion': Question.format(result_question)
+        })
+
 
 
     """
