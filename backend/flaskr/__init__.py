@@ -173,19 +173,29 @@ def create_app(test_config=None):
     def get_next_question():
         data = request.get_json(force=True)
         previous_questions = data.get('previous_questions')
-        quiz_category = data.get('quiz_category')
+        quiz_category = data.get('quiz_category', {}).get('id')
         print(previous_questions)
         print(quiz_category)
-        questions = Question.query.filter(Question.id.notin_(previous_questions)).all()
+        if quiz_category:
+            query = Question.query.filter_by(category=quiz_category)
+        questions = query.filter(Question.id.notin_(previous_questions)).all()
         print(questions)
         if(len(questions) > 0):
-            result_question = questions[0]
+            result_question = random.choice(questions)
             print(result_question)
-        return jsonify({
-            'success': True,
-            'previousQuestions': previous_questions,
-            'currentQuestion': Question.format(result_question)
-        })
+
+        if len(questions) == 0:
+            return jsonify({
+                'success': True,
+                'previousQuestions': previous_questions,
+                'currentQuestion': None
+            })
+        else:    
+            return jsonify({
+                'success': True,
+                'previousQuestions': previous_questions,
+                'currentQuestion': Question.format(result_question)
+            })
 
 
 
@@ -209,6 +219,14 @@ def create_app(test_config=None):
             "error": 422,
             "message": "Unprocessable content"
             }), 422
+    
+    @app.errorhandler(405)
+    def not_found(error):
+        return jsonify({
+            "success": False, 
+            "error": 405,
+            "message": "Method not allowed"
+            }), 405
 
     return app
 
