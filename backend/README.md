@@ -102,3 +102,98 @@ createdb trivia_test
 psql trivia_test < trivia.psql
 python test_flaskr.py
 ```
+
+## Usage
+
+## Get Categories endpoint
+GET http://127.0.0.1:5000/categories
+
+RESPONSE
+
+{
+    "success": True,
+    "categories": []
+}
+
+GET http://127.0.0.1:5000/questions?page=1
+
+RESPONSE
+
+{
+    "success": True,
+    "questions": [],
+    "categories": [],
+    "current_category": "",
+    "total_Questions": 10
+}
+
+DELETE http://127.0.0.1:5000/questions/1
+
+RESPONSE
+
+{
+    "id": 1,
+    "success": True
+}
+
+POST http://127.0.0.1:5000/questions
+
+Request
+
+        {
+            question='q1',
+            answer='a1',
+            difficulty=1,
+            category=1
+        }
+
+Response
+
+        {
+          "success": True
+        }
+
+POST http://127.0.0.1:5000/questions/search
+
+Request
+
+        {
+            searchTerm='q1'
+        }
+
+Response
+
+        {
+          'success': True,
+          'questions': [],
+          'total_questions': 5,
+          'current_category': ""
+        }        
+
+GET http://127.0.0.1:5000/categories/1/questions
+
+Response
+
+{
+    'success': True,
+    'questions': [],
+    'total_questions': 5,
+    'current_category': ""
+}
+
+POST http://127.0.0.1:5000/quizzes
+
+Request
+
+{
+    "previous_questions": [],
+    "quiz_category": {'id:1, 'type:1}
+}
+
+Response
+
+{
+  'success': True,
+  'previousQuestions': [],
+  'currentQuestion': None
+}

@@ -96,7 +96,11 @@ def create_app(test_config=None):
         question = Question.query.get(id)
         print(question)
         Question.delete(question)
-        return jsonify({"success": True})
+        return jsonify(
+            {
+                "success": True,
+                "id": id
+            })
 
     """
     @TODO:
